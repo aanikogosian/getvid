@@ -64,4 +64,5 @@ WantedBy=multi-user.target
 ## Notes
 
 Respect copyright, site terms, and local law. For private or age-gated sites, provide a cookies file with
-`YTDLP_COOKIES`; without valid cookies those downloads may fail.
+`YTDLP_COOKIES`; the file path must exist, otherwise the bot ignores it and logs a warning.
+Without valid cookies those downloads may fail.

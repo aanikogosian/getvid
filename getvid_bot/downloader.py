@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 from uuid import uuid4
@@ -44,7 +45,10 @@ class VideoDownloader:
             "no_warnings": True,
         }
         if self.cookies:
-            options["cookiefile"] = str(self.cookies)
+            if self.cookies.is_file():
+                options["cookiefile"] = str(self.cookies)
+            else:
+                logging.warning("Ignoring missing YTDLP_COOKIES file: %s", self.cookies)
 
         try:
             with yt_dlp.YoutubeDL(options) as ydl:
@@ -65,4 +69,6 @@ class VideoDownloader:
                 title = str(info.get("title") or filename.stem)
                 return DownloadedVideo(path=filename, title=title, source_url=url)
         except yt_dlp.utils.DownloadError as exc:
+            raise DownloadError(str(exc)) from exc
+        except OSError as exc:
             raise DownloadError(str(exc)) from exc
