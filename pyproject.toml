@@ -1,0 +1,18 @@
+[project]
+name = "getvid"
+version = "0.1.0"
+description = "Telegram bot that downloads videos from URLs with yt-dlp and sends them back via a local Telegram Bot API server."
+requires-python = ">=3.11"
+dependencies = [
+    "aiogram>=3.7,<4",
+    "yt-dlp>=2026.1.1",
+]
+
+[project.scripts]
+getvid-bot = "getvid_bot.main:main"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
