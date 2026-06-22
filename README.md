@@ -43,22 +43,66 @@ getvid-bot
 
 Send `/start` to the bot, then send a direct video URL.
 
-## systemd example
+## systemd setup
 
-```ini
-[Unit]
-Description=getvid Telegram downloader bot
-After=network-online.target
+The example below assumes the project lives in `/opt/getvid`. If you keep it somewhere else,
+replace `/opt/getvid` in the commands and unit file with your actual path.
 
-[Service]
-WorkingDirectory=/opt/getvid
-EnvironmentFile=/opt/getvid/.env
-ExecStart=/opt/getvid/.venv/bin/getvid-bot
-Restart=always
-RestartSec=5
+1. Copy the project to `/opt/getvid` and install it:
 
-[Install]
-WantedBy=multi-user.target
+   ```bash
+   sudo mkdir -p /opt/getvid
+   sudo rsync -a --delete ./ /opt/getvid/
+   cd /opt/getvid
+   python3 -m venv .venv
+   . .venv/bin/activate
+   pip install -e .
+   cp .env.example .env
+   nano .env
+   ```
+
+2. Create the systemd unit:
+
+   ```bash
+   sudo tee /etc/systemd/system/getvid.service >/dev/null <<'EOF'
+   [Unit]
+   Description=getvid Telegram downloader bot
+   After=network-online.target
+   Wants=network-online.target
+
+   [Service]
+   Type=simple
+   WorkingDirectory=/opt/getvid
+   EnvironmentFile=/opt/getvid/.env
+   ExecStart=/opt/getvid/.venv/bin/getvid-bot
+   Restart=always
+   RestartSec=5
+
+   [Install]
+   WantedBy=multi-user.target
+   EOF
+   ```
+
+3. Enable autostart and start the bot now:
+
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl enable --now getvid.service
+   ```
+
+4. Check status and logs:
+
+   ```bash
+   systemctl status getvid.service
+   journalctl -u getvid.service -f
+   ```
+
+Useful maintenance commands:
+
+```bash
+sudo systemctl restart getvid.service
+sudo systemctl stop getvid.service
+sudo systemctl disable getvid.service
 ```
 
 ## Notes
