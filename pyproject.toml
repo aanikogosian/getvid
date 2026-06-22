@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "getvid"
 version = "0.1.0"
 description = "Telegram bot that downloads videos from URLs with yt-dlp and sends them back via a local Telegram Bot API server."
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 dependencies = [
     "aiogram>=3.7,<4",
     "yt-dlp>=2026.1.1",
