@@ -15,7 +15,8 @@ upload limits when the local server is started with an adequate `--max-webhook-c
 
 ## Requirements
 
-- Python 3.11+
+- Python 3.11+ (`python3` on Debian/Ubuntu)
+- `python3-venv` installed for virtual environments
 - `ffmpeg` available in `PATH` for merging separate video/audio streams
 - A bot token from BotFather
 - Your local Telegram Bot API server already running
@@ -23,7 +24,7 @@ upload limits when the local server is started with an adequate `--max-webhook-c
 ## Install
 
 ```bash
-python -m venv .venv
+python3 -m venv .venv
 . .venv/bin/activate
 pip install -e .
 cp .env.example .env
