@@ -46,7 +46,8 @@ Send `/start` to the bot, then send a direct video URL.
 
 For Twitter/X links, the bot first uses the default `yt-dlp` extractor API. If Twitter reports a
 video as unavailable, the bot automatically retries with the `syndication` and `legacy` extractor
-APIs before returning an error.
+APIs before returning an error. Some Twitter/X videos still require cookies from a logged-in
+browser; export them in Netscape format and set `YTDLP_COOKIES=/path/to/cookies.txt` in `.env`.
 
 ## systemd setup
 

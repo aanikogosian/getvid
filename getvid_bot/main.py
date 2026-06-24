@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import html
 import logging
 import re
 import shutil
@@ -65,9 +66,8 @@ async def handle_url(
             )
             await status.delete()
         except DownloadError as exc:
-            await status.edit_text(
-                f"Не удалось скачать видео:\n<code>{str(exc)[:3500]}</code>"
-            )
+            error_text = html.escape(str(exc)[:3000])
+            await status.edit_text(f"Не удалось скачать видео:\n<code>{error_text}</code>")
         except Exception:
             logging.exception("Unexpected failure while processing %s", url)
             await status.edit_text(

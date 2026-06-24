@@ -55,7 +55,17 @@ class VideoDownloader:
 
         if last_error is None:
             raise DownloadError("yt-dlp did not run any download attempts")
+        if TWITTER_URL_RE.search(url) and not self._has_cookiefile():
+            raise DownloadError(
+                f"{last_error}\n\n"
+                "Twitter/X often hides playable media from unauthenticated requests. "
+                "Export cookies from a logged-in browser in Netscape format and set "
+                "YTDLP_COOKIES=/path/to/cookies.txt in .env, then restart the service."
+            ) from last_error
         raise last_error
+
+    def _has_cookiefile(self) -> bool:
+        return self.cookies is not None and self.cookies.is_file()
 
     def _download_with_options(
         self,
@@ -78,7 +88,7 @@ class VideoDownloader:
         if twitter_api:
             options["extractor_args"] = {"twitter": {"api": [twitter_api]}}
         if self.cookies:
-            if self.cookies.is_file():
+            if self._has_cookiefile():
                 options["cookiefile"] = str(self.cookies)
             else:
                 logging.warning("Ignoring missing YTDLP_COOKIES file: %s", self.cookies)
