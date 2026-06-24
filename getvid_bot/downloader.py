@@ -2,11 +2,14 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from uuid import uuid4
 
 import yt_dlp
+
+TWITTER_URL_RE = re.compile(r"https?://(?:[^/]+\.)?(?:twitter|x)\.com/", re.IGNORECASE)
 
 
 @dataclass(frozen=True)
@@ -32,6 +35,34 @@ class VideoDownloader:
         return await asyncio.to_thread(self._download_sync, url, job_dir)
 
     def _download_sync(self, url: str, job_dir: Path) -> DownloadedVideo:
+        api_attempts: list[str | None] = [None]
+        if TWITTER_URL_RE.search(url):
+            api_attempts.extend(["syndication", "legacy"])
+
+        last_error: DownloadError | None = None
+        for twitter_api in api_attempts:
+            try:
+                return self._download_with_options(url, job_dir, twitter_api)
+            except DownloadError as exc:
+                last_error = exc
+                if twitter_api is None and len(api_attempts) > 1:
+                    logging.info("Twitter download failed with default API; trying fallback APIs")
+                    continue
+                if twitter_api == "syndication":
+                    logging.info("Twitter download failed with syndication API; trying legacy API")
+                    continue
+                raise
+
+        if last_error is None:
+            raise DownloadError("yt-dlp did not run any download attempts")
+        raise last_error
+
+    def _download_with_options(
+        self,
+        url: str,
+        job_dir: Path,
+        twitter_api: str | None,
+    ) -> DownloadedVideo:
         output_template = str(job_dir / "%(title).180B [%(id)s].%(ext)s")
         options: dict[str, object] = {
             "format": "bestvideo*+bestaudio/best",
@@ -44,6 +75,8 @@ class VideoDownloader:
             "quiet": True,
             "no_warnings": True,
         }
+        if twitter_api:
+            options["extractor_args"] = {"twitter": {"api": [twitter_api]}}
         if self.cookies:
             if self.cookies.is_file():
                 options["cookiefile"] = str(self.cookies)

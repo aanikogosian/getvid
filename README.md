@@ -12,6 +12,7 @@ upload limits when the local server is started with an adequate `--max-webhook-c
 - Uses the local Telegram Bot API endpoint via `TELEGRAM_API_ROOT`.
 - Optional private allow-list with `ALLOWED_USER_IDS`.
 - Optional `yt-dlp` cookies file for sites that require authentication, age checks, or consent.
+- Automatic Twitter/X fallback extraction through `graphql`, `syndication`, then `legacy` APIs.
 
 ## Requirements
 
@@ -42,6 +43,10 @@ getvid-bot
 ```
 
 Send `/start` to the bot, then send a direct video URL.
+
+For Twitter/X links, the bot first uses the default `yt-dlp` extractor API. If Twitter reports a
+video as unavailable, the bot automatically retries with the `syndication` and `legacy` extractor
+APIs before returning an error.
 
 ## systemd setup
 
